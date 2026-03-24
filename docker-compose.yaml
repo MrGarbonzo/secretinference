@@ -1,6 +1,6 @@
 services:
   secretinference:
-    image: ghcr.io/mrgarbonzo/secretinference@sha256:PLACEHOLDER
+    image: ghcr.io/mrgarbonzo/secretinference@sha256:578e7ecc50dd8b6be313401ca197fed4571ac0b140b93ef5ea8ef747a2d5f17d
     restart: unless-stopped
     ports:
       - "3000:3000"

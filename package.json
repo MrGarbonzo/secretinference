@@ -1,0 +1,21 @@
+{
+  "name": "secretinference",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Private LLM inference proxy in a SecretVM TEE — pay-per-request via x402",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test:pricing": "node test/test-pricing.js"
+  },
+  "dependencies": {
+    "@x402/core": "^2.8.0",
+    "@x402/evm": "^2.8.0",
+    "@x402/express": "^2.8.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.0.0",
+    "ethers": "^6.0.0",
+    "express": "^4.18.0",
+    "uuid": "^9.0.0"
+  }
+}

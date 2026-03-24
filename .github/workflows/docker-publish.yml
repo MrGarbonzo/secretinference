@@ -1,0 +1,51 @@
+name: Build and push Docker image
+
+on:
+  push:
+    branches: [main]
+
+env:
+  IMAGE: ghcr.io/mrgarbonzo/secretinference
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}:latest,${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Output image digest
+        id: digest
+        run: |
+          docker pull ${{ env.IMAGE }}:${{ github.sha }}
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.IMAGE }}:${{ github.sha }} | cut -d@ -f2)
+          echo "IMAGE_DIGEST=$DIGEST" >> $GITHUB_OUTPUT
+          echo "Digest: $DIGEST"
+
+      - name: Update docker-compose digest
+        run: |
+          NEW_DIGEST=${{ steps.digest.outputs.IMAGE_DIGEST }}
+          sed -i "s|ghcr.io/mrgarbonzo/secretinference@sha256:.*|ghcr.io/mrgarbonzo/secretinference@${NEW_DIGEST}|" docker-compose.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docker-compose.yaml
+          git diff --staged --quiet || git commit -m "ci: update image digest to ${NEW_DIGEST:0:19}"
+          git push
